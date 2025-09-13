@@ -89,7 +89,8 @@ async def spank(ctx, member: discord.Member):
 
 def run_flask():
     """Run Flask server in a separate thread"""
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=False
+>>>>>>> f234a78 (Add health check endpoint for bot uptime monitoring)
 
 if __name__ == "__main__":
     # Start Flask server in background thread
