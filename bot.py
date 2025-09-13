@@ -71,4 +71,4 @@ async def spank(ctx, member: discord.Member):
     embed.set_image(url=gif)
     await ctx.send(embed=embed)
 
-bot.run("MTQxNjA4MzA4ODIzNjIyMDU3Nw.G7_VsQ.vKGXvEmifQAbxm2GOEaCUnNid3YqTBA4LvWqzs")
+bot.run("YOUR_BOT_TOKEN")
