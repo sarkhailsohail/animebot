@@ -29,19 +29,12 @@ def health_check():
     })
 
 # --- API Fetch Function ---
-async def get_image(api: str, endpoint: str = None):
+async def get_nsfw_image(endpoint):
+    url = f"https://api.waifu.pics/nsfw/{endpoint}"
     async with aiohttp.ClientSession() as session:
-        if api == "waifu":
-            url = f"https://api.waifu.pics/nsfw/{endpoint}"
-            async with session.get(url) as resp:
-                data = await resp.json()
-                return data["url"]
-
-        elif api == "nekos":
-            url = f"https://nekos.best/api/v2/{endpoint}"
-            async with session.get(url) as resp:
-                data = await resp.json()
-                return data["results"][0]["url"]
+        async with session.get(url) as resp:
+            data = await resp.json()
+            return data["url"]
 
 # --- Commands ---
 @bot.command()
@@ -54,19 +47,11 @@ async def hentai(ctx):
 
 @bot.command()
 @commands.is_nsfw()
-async def blowjob(ctx, member: discord.Member):
+async def blowjob(ctx):
     img_url = await get_nsfw_image("blowjob")
-    
-    # Create a single embed with title, description, color, and image
-    embed = discord.Embed(
-        title="🔞 BlowJob",
-        description=f"🔥 {ctx.author.mention} gives a blowjob to {member.mention}",
-        color=discord.Color.purple()
-    )
+    embed = discord.Embed(title="🔞 Blowjob", color=discord.Color.purple())
     embed.set_image(url=img_url)
-    
     await ctx.send(embed=embed)
-
 
 @bot.command()
 @commands.is_nsfw()
@@ -101,17 +86,6 @@ async def spank(ctx, member: discord.Member):
                           color=discord.Color.red())
     embed.set_image(url=gif)
     await ctx.send(embed=embed)
-
-@bot.command()
-async def pat(ctx, member: discord.Member = None):
-    img_url = await get_image("nekos", "pat")
-    if member:
-        embed = discord.Embed(description=f"🤗 {ctx.author.mention} pats {member.mention}", color=discord.Color.green())
-    else:
-        embed = discord.Embed(description=f"🤗 {ctx.author.mention} needs pats!", color=discord.Color.green())
-    embed.set_image(url=img_url)
-    await ctx.send(embed=embed)
-
 
 def run_flask():
     """Run Flask server in a separate thread"""
