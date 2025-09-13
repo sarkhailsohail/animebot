@@ -47,11 +47,19 @@ async def hentai(ctx):
 
 @bot.command()
 @commands.is_nsfw()
-async def blowjob(ctx):
+async def blowjob(ctx, member: discord.Member):
     img_url = await get_nsfw_image("blowjob")
-    embed = discord.Embed(title="🔞 Blowjob", color=discord.Color.purple())
+    
+    # Create a single embed with title, description, color, and image
+    embed = discord.Embed(
+        title="🔞 BlowJob",
+        description=f"🔥 {ctx.author.mention} gives a blowjob to {member.mention}",
+        color=discord.Color.purple()
+    )
     embed.set_image(url=img_url)
+    
     await ctx.send(embed=embed)
+
 
 @bot.command()
 @commands.is_nsfw()
