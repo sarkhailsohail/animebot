@@ -64,7 +64,6 @@ async def neko(ctx):
 @bot.command()
 @commands.is_nsfw()
 async def thighs(ctx):
-    # Custom category images
     thighs_list = [
         "https://example.com/thigh1.jpg",
         "https://example.com/thigh2.jpg"
@@ -87,10 +86,10 @@ async def spank(ctx, member: discord.Member):
     embed.set_image(url=gif)
     await ctx.send(embed=embed)
 
+# --- Flask runner ---
 def run_flask():
     """Run Flask server in a separate thread"""
-    app.run(host='0.0.0.0', port=5000, debug=False
->>>>>>> f234a78 (Add health check endpoint for bot uptime monitoring)
+    app.run(host='0.0.0.0', port=5000, debug=False)
 
 if __name__ == "__main__":
     # Start Flask server in background thread
@@ -98,4 +97,6 @@ if __name__ == "__main__":
     flask_thread.start()
     
     # Start Discord bot
+    
+
     bot.run(os.getenv("DISCORD_TOKEN"))
