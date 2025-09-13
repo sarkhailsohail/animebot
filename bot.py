@@ -1,34 +1,12 @@
 import discord
 from discord.ext import commands
 import aiohttp
-import random
-import os
-import threading
-from dotenv import load_dotenv
-from flask import Flask, jsonify
-
-load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
 
 intents = discord.Intents.default()
-intents.message_content = True
+intents.members = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Flask app for health checks
-app = Flask(__name__)
-
-@app.route('/')
-@app.route('/health')
-def health_check():
-    """Health check endpoint for uptime monitoring"""
-    bot_status = "online" if bot.is_ready() else "connecting"
-    return jsonify({
-        "status": "ok",
-        "bot_status": bot_status,
-        "uptime": "running"
-    })
-
-# --- API Fetch Function ---
+# --- API Fetch Functions ---
 async def get_nsfw_image(endpoint):
     url = f"https://api.waifu.pics/nsfw/{endpoint}"
     async with aiohttp.ClientSession() as session:
@@ -36,67 +14,135 @@ async def get_nsfw_image(endpoint):
             data = await resp.json()
             return data["url"]
 
-# --- Commands ---
-@bot.command()
-@commands.is_nsfw()
-async def hentai(ctx):
-    img_url = await get_nsfw_image("waifu")
-    embed = discord.Embed(title="🔞 Hentai Waifu", color=discord.Color.purple())
+async def get_sfw_image(endpoint):
+    url = f"https://api.waifu.pics/sfw/{endpoint}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            data = await resp.json()
+            return data["url"]
+
+# --- Helper for SFW actions ---
+async def sfw_action(ctx, action: str, emoji: str, color: discord.Color, member: discord.Member = None):
+    img_url = await get_sfw_image(action)
+    if member:
+        desc = f"{emoji} {ctx.author.mention} {action}s {member.mention}"
+    else:
+        desc = f"{emoji} {ctx.author.mention} does {action}!"
+    embed = discord.Embed(description=desc, color=color)
     embed.set_image(url=img_url)
     await ctx.send(embed=embed)
 
+# --- NSFW Commands ---
 @bot.command()
 @commands.is_nsfw()
-async def blowjob(ctx):
+async def blowjob(ctx, member: discord.Member = None):
     img_url = await get_nsfw_image("blowjob")
-    embed = discord.Embed(title="🔞 Blowjob", color=discord.Color.purple())
+    desc = f"🔥 {ctx.author.mention} gives {member.mention} a blowjob" if member else f"🔥 {ctx.author.mention} is feeling naughty..."
+    embed = discord.Embed(description=desc, color=discord.Color.red())
     embed.set_image(url=img_url)
     await ctx.send(embed=embed)
 
+# --- SFW Commands ---
 @bot.command()
-@commands.is_nsfw()
-async def neko(ctx):
-    img_url = await get_nsfw_image("neko")
-    embed = discord.Embed(title="😼 Neko Lewd", color=discord.Color.purple())
-    embed.set_image(url=img_url)
-    await ctx.send(embed=embed)
+async def cry(ctx):
+    await sfw_action(ctx, "cry", "😭", discord.Color.blue())
 
 @bot.command()
-@commands.is_nsfw()
-async def thighs(ctx):
-    thighs_list = [
-        "https://example.com/thigh1.jpg",
-        "https://example.com/thigh2.jpg"
-    ]
-    img_url = random.choice(thighs_list)
-    embed = discord.Embed(title="🍑 Anime Thighs", color=discord.Color.purple())
-    embed.set_image(url=img_url)
-    await ctx.send(embed=embed)
+async def cuddle(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "cuddle", "🤗", discord.Color.pink(), member)
 
 @bot.command()
-@commands.is_nsfw()
-async def spank(ctx, member: discord.Member):
-    gifs = [
-        "https://media.tenor.com/X4M6tiyAvJYAAAAC/anime-spank.gif",
-        "https://media.tenor.com/aaMzyC4N2SwAAAAC/spank.gif"
-    ]
-    gif = random.choice(gifs)
-    embed = discord.Embed(description=f"🔥 {ctx.author.mention} spanks {member.mention}",
-                          color=discord.Color.red())
-    embed.set_image(url=gif)
-    await ctx.send(embed=embed)
+async def hug(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "hug", "🤗", discord.Color.green(), member)
 
-# --- Flask runner ---
-def run_flask():
-    """Run Flask server in a separate thread"""
-    app.run(host='0.0.0.0', port=5000, debug=False)
+@bot.command()
+async def lick(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "lick", "👅", discord.Color.orange(), member)
 
-if __name__ == "__main__":
-    # Start Flask server in background thread
-    flask_thread = threading.Thread(target=run_flask, daemon=True)
-    flask_thread.start()
-    
-    # Start Discord bot
-    
+@bot.command()
+async def pat(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "pat", "🙃", discord.Color.purple(), member)
 
-    bot.run(os.getenv("DISCORD_TOKEN"))
+@bot.command()
+async def smug(ctx):
+    await sfw_action(ctx, "smug", "😏", discord.Color.dark_orange())
+
+@bot.command()
+async def smile(ctx):
+    await sfw_action(ctx, "smile", "😊", discord.Color.teal())
+
+@bot.command()
+async def yeet(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "yeet", "💨", discord.Color.blue(), member)
+
+@bot.command()
+async def bonk(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "bonk", "🔨", discord.Color.dark_red(), member)
+
+@bot.command()
+async def wave(ctx):
+    await sfw_action(ctx, "wave", "👋", discord.Color.gold())
+
+@bot.command()
+async def highfive(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "highfive", "🙌", discord.Color.green(), member)
+
+@bot.command()
+async def handhold(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "handhold", "🤝", discord.Color.blurple(), member)
+
+@bot.command()
+async def dance(ctx):
+    await sfw_action(ctx, "dance", "💃", discord.Color.purple())
+
+@bot.command()
+async def bite(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "bite", "🦷", discord.Color.dark_blue(), member)
+
+@bot.command()
+async def slap(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "slap", "🖐️", discord.Color.red(), member)
+
+@bot.command()
+async def kill(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "kill", "☠️", discord.Color.dark_gray(), member)
+
+@bot.command()
+async def wink(ctx):
+    await sfw_action(ctx, "wink", "😉", discord.Color.magenta())
+
+@bot.command()
+async def kick(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "kick", "🦵", discord.Color.dark_gold(), member)
+
+@bot.command()
+async def happy(ctx):
+    await sfw_action(ctx, "happy", "😄", discord.Color.green())
+
+@bot.command()
+async def poke(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "poke", "👉", discord.Color.orange(), member)
+
+@bot.command()
+async def nom(ctx):
+    await sfw_action(ctx, "nom", "🍴", discord.Color.light_gray())
+
+@bot.command()
+async def blush(ctx):
+    await sfw_action(ctx, "blush", "😊", discord.Color.pink())
+
+@bot.command()
+async def glomp(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "glomp", "💥", discord.Color.dark_purple(), member)
+
+@bot.command()
+async def cringe(ctx):
+    await sfw_action(ctx, "cringe", "😬", discord.Color.dark_magenta())
+
+@bot.command()
+async def bully(ctx, member: discord.Member = None):
+    await sfw_action(ctx, "bully", "😈", discord.Color.dark_red(), member)
+
+
+# --- Run the Bot ---
+bot.run("YOUR_TOKEN_HERE")
